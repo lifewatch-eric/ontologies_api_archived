@@ -1,0 +1,393 @@
+GIT
+  remote: https://github.com/ncbo/goo.git
+  revision: 5e7c8f42ed2598bab36152d98a254657c6c0c311
+  branch: master
+  specs:
+    goo (0.0.2)
+      addressable (= 2.3.5)
+      pry
+      rdf (= 1.0.8)
+      redis
+      rest-client
+      rsolr
+      sparql-client
+      systemu
+      uuid
+
+GIT
+  remote: https://github.com/ncbo/ncbo_annotator.git
+  revision: 070a524905da6c2324342e68790912c64424bd25
+  branch: master
+  specs:
+    ncbo_annotator (0.0.1)
+      goo
+      ontologies_linked_data
+      redis
+      ruby-xxHash
+
+GIT
+  remote: https://github.com/ncbo/ncbo_cron.git
+  revision: a9dc3ed0449d44946c6760bc7f72120cb701617a
+  branch: master
+  specs:
+    ncbo_cron (0.0.1)
+      dante
+      goo
+      google-api-client
+      mlanett-redis-lock
+      multi_json
+      ncbo_annotator
+      ontologies_linked_data
+      redis
+      rufus-scheduler (~> 2.0.24)
+
+GIT
+  remote: https://github.com/ncbo/ncbo_ontology_recommender.git
+  revision: 1a4c677e9d2d110b2a78414bf6320112dd0b9211
+  branch: master
+  specs:
+    ncbo_ontology_recommender (0.0.1)
+      goo
+      ncbo_annotator
+      ontologies_linked_data
+      redis
+
+GIT
+  remote: https://github.com/ncbo/ncbo_resolver.git
+  revision: 67989c445e53e019b3b3fa4905e0aa9d519df0ed
+  specs:
+    ncbo_resolver (0.0.1)
+      recursive-open-struct
+      redis
+
+GIT
+  remote: https://github.com/ncbo/ontologies_linked_data.git
+  revision: 4c4f60b443ce833c2993ee870594179527902f45
+  branch: master
+  specs:
+    ontologies_linked_data (0.0.1)
+      activesupport
+      bcrypt
+      goo
+      json
+      libxml-ruby
+      multi_json
+      ncbo_resource_index
+      oj
+      omni_logger
+      pony
+      rack
+      rack-test
+      rsolr
+      rubyzip
+
+GIT
+  remote: https://github.com/ncbo/resource_index.git
+  revision: 9d1f0a4e2f2816990a1f80ee576c73a08e34e754
+  specs:
+    ncbo_resource_index (0.0.1)
+      elasticsearch (= 2.0.0)
+      mysql2
+      pony
+      ref
+      ruby-xxHash
+      sequel
+      typhoeus
+
+GIT
+  remote: https://github.com/ncbo/sparql-client.git
+  revision: 8dbf57fb87264699eb25643c35a219e02d21f4fc
+  branch: master
+  specs:
+    sparql-client (1.0.1)
+      json_pure (>= 1.4)
+      net-http-persistent (= 2.9.4)
+      rdf (>= 1.0)
+
+GIT
+  remote: https://github.com/palexander/rack-post-body-to-params.git
+  revision: 0fd30e710386d0cb8a3a6833d9549d7b655d5398
+  branch: multipart_support
+  specs:
+    rack-post-body-to-params (0.1.8)
+      activesupport (>= 2.3)
+
+GIT
+  remote: https://github.com/palexander/shotgun.git
+  revision: db198224aaab2e4cb9b049adccb30e387d88bc3b
+  branch: ncbo
+  specs:
+    shotgun (0.9)
+      rack (>= 1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (3.2.22.5)
+      i18n (~> 0.6, >= 0.6.4)
+      multi_json (~> 1.0)
+    addressable (2.3.5)
+    airbrussh (1.3.0)
+      sshkit (>= 1.6.1, != 1.7.0)
+    autoparse (0.3.3)
+      addressable (>= 2.3.1)
+      extlib (>= 0.9.15)
+      multi_json (>= 1.0.0)
+    backports (3.11.1)
+    bcrypt (3.1.11)
+    builder (3.2.3)
+    capistrano (3.10.1)
+      airbrussh (>= 1.0.0)
+      i18n
+      rake (>= 10.0.0)
+      sshkit (>= 1.9.0)
+    capistrano-bundler (1.1.4)
+      capistrano (~> 3.1)
+      sshkit (~> 1.2)
+    capistrano-locally (0.2.4)
+      capistrano (~> 3.0)
+    capistrano-rbenv (2.0.4)
+      capistrano (~> 3.1)
+      sshkit (~> 1.3)
+    coderay (1.1.2)
+    concurrent-ruby (1.0.5)
+    cube-ruby (0.0.3)
+    dante (0.2.0)
+    docile (1.1.5)
+    domain_name (0.5.20170404)
+      unf (>= 0.0.5, < 1.0.0)
+    elasticsearch (2.0.0)
+      elasticsearch-api (= 2.0.0)
+      elasticsearch-transport (= 2.0.0)
+    elasticsearch-api (2.0.0)
+      multi_json
+    elasticsearch-transport (2.0.0)
+      faraday
+      multi_json
+    ethon (0.11.0)
+      ffi (>= 1.3.0)
+    extlib (0.9.16)
+    faraday (0.14.0)
+      multipart-post (>= 1.2, < 3)
+    ffi (1.9.21)
+    get_process_mem (0.2.1)
+    google-api-client (0.8.7)
+      activesupport (>= 3.2, < 5.0)
+      addressable (~> 2.3)
+      autoparse (~> 0.3)
+      extlib (~> 0.9)
+      faraday (~> 0.9)
+      googleauth (~> 0.3)
+      launchy (~> 2.4)
+      multi_json (~> 1.10)
+      retriable (~> 1.4)
+      signet (~> 0.6)
+    googleauth (0.6.2)
+      faraday (~> 0.12)
+      jwt (>= 1.4, < 3.0)
+      logging (~> 2.0)
+      memoist (~> 0.12)
+      multi_json (~> 1.11)
+      os (~> 0.9)
+      signet (~> 0.7)
+    haml (5.0.4)
+      temple (>= 0.8.0)
+      tilt
+    http-cookie (1.0.3)
+      domain_name (~> 0.5)
+    i18n (0.9.3)
+      concurrent-ruby (~> 1.0)
+    json (2.1.0)
+    json-schema (2.5.0)
+      addressable (~> 2.3)
+    json_pure (2.1.0)
+    jwt (2.1.0)
+    kgio (2.11.2)
+    launchy (2.4.3)
+      addressable (~> 2.3)
+    libxml-ruby (3.1.0)
+    little-plugger (1.1.4)
+    logger (1.2.8)
+    logging (2.2.2)
+      little-plugger (~> 1.1)
+      multi_json (~> 1.10)
+    macaddr (1.7.1)
+      systemu (~> 2.6.2)
+    mail (2.7.0)
+      mini_mime (>= 0.1.1)
+    memoist (0.16.0)
+    method_source (0.9.0)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
+    mini_mime (1.0.0)
+    minitest (4.7.5)
+    minitest-stub_any_instance (1.0.2)
+    mlanett-redis-lock (0.2.7)
+      redis
+    multi_json (1.13.1)
+    multipart-post (2.0.0)
+    mysql2 (0.4.10)
+    net-http-persistent (2.9.4)
+    net-scp (1.2.1)
+      net-ssh (>= 2.6.5)
+    net-ssh (4.2.0)
+    netrc (0.11.0)
+    newrelic_rpm (4.8.0.341)
+    oj (2.18.5)
+    omni_logger (0.1.4)
+      logger
+    os (0.9.6)
+    parseconfig (1.0.8)
+    pony (1.12)
+      mail (>= 2.0)
+    pry (0.11.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    rack (1.6.8)
+    rack-accept (0.4.5)
+      rack (>= 0.4)
+    rack-attack (5.0.1)
+      rack
+    rack-cache (1.7.1)
+      rack (>= 0.4)
+    rack-cors (1.0.2)
+    rack-mini-profiler (0.10.7)
+      rack (>= 1.2.0)
+    rack-protection (1.5.3)
+      rack
+    rack-test (0.8.2)
+      rack (>= 1.0, < 3)
+    rack-timeout (0.4.2)
+    rainbows (5.1.1)
+      kgio (~> 2.5)
+      rack (>= 1.1, < 3.0)
+      unicorn (~> 5.1)
+    raindrops (0.19.0)
+    rake (10.5.0)
+    rdf (1.0.8)
+      addressable (>= 2.2)
+    recursive-open-struct (1.1.0)
+    redcarpet (3.4.0)
+    redis (3.3.5)
+    redis-activesupport (4.1.5)
+      activesupport (>= 3, < 5)
+      redis-store (~> 1.1.0)
+    redis-rack-cache (1.2.4)
+      rack-cache (~> 1.2)
+      redis-store (~> 1.1.0)
+    redis-store (1.1.7)
+      redis (>= 2.2)
+    ref (2.0.0)
+    rest-client (2.0.2)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+    retriable (1.4.1)
+    rsolr (2.1.0)
+      builder (>= 2.1.2)
+      faraday (>= 0.9.0)
+    ruby-xxHash (0.4.0.1)
+    rubyzip (1.2.1)
+    rufus-scheduler (2.0.24)
+      tzinfo (>= 0.3.22)
+    sequel (5.5.0)
+    signet (0.8.1)
+      addressable (~> 2.3)
+      faraday (~> 0.9)
+      jwt (>= 1.5, < 3.0)
+      multi_json (~> 1.10)
+    simplecov (0.15.1)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.2)
+    sinatra (1.4.8)
+      rack (~> 1.5)
+      rack-protection (~> 1.4)
+      tilt (>= 1.3, < 3)
+    sinatra-advanced-routes (0.5.3)
+      sinatra (~> 1.0)
+    sinatra-contrib (1.4.7)
+      backports (>= 2.0)
+      multi_json
+      rack-protection
+      rack-test
+      sinatra (~> 1.4.0)
+      tilt (>= 1.3, < 3)
+    sshkit (1.16.0)
+      net-scp (>= 1.1.2)
+      net-ssh (>= 2.8.0)
+    systemu (2.6.5)
+    temple (0.8.0)
+    thread_safe (0.3.6)
+    tilt (2.0.8)
+    typhoeus (1.3.0)
+      ethon (>= 0.9.0)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.5)
+    unicorn (5.4.0)
+      kgio (~> 2.6)
+      raindrops (~> 0.7)
+    unicorn-worker-killer (0.4.4)
+      get_process_mem (~> 0)
+      unicorn (>= 4, < 6)
+    uuid (2.3.8)
+      macaddr (~> 1.0)
+
+PLATFORMS
+  ruby
+  x86_64-darwin-16
+
+DEPENDENCIES
+  activesupport (~> 3.0)
+  capistrano (~> 3.8)
+  capistrano-bundler (~> 1.1.1)
+  capistrano-locally
+  capistrano-rbenv (~> 2.0.2)
+  cube-ruby
+  goo!
+  google-api-client (< 0.9)
+  haml
+  json-schema (~> 2.0)
+  minitest (~> 4.0)
+  minitest-stub_any_instance
+  multi_json (~> 1.0)
+  ncbo_annotator!
+  ncbo_cron!
+  ncbo_ontology_recommender!
+  ncbo_resolver!
+  ncbo_resource_index!
+  newrelic_rpm
+  oj (~> 2.0)
+  ontologies_linked_data!
+  parseconfig
+  pry
+  rack
+  rack-accept (~> 0.4)
+  rack-attack
+  rack-cache (~> 1.0)
+  rack-cors
+  rack-mini-profiler
+  rack-post-body-to-params!
+  rack-timeout
+  rainbows
+  rake (~> 10.0)
+  redcarpet
+  redis (~> 3.3.3)
+  redis-activesupport
+  redis-rack-cache (~> 1.0)
+  shotgun!
+  simplecov
+  sinatra (~> 1.0)
+  sinatra-advanced-routes
+  sinatra-contrib (~> 1.0)
+  sparql-client!
+  unicorn
+  unicorn-worker-killer
+
+BUNDLED WITH
+   1.16.0

@@ -1,0 +1,40 @@
+# This file can be copied and renamed to match the environment you are running in:
+#   production.rb
+#   development.rb
+#   test.rb
+
+LinkedData.config do |config|
+  config.repository_folder = File.expand_path('../../../test/data/uploaded_ontologies', __FILE__)
+  config.goo_host = "localhost"
+  config.goo_port = 9000
+  config.search_server_url = "http://localhost:8983/solr/term_search_core1"
+  config.property_search_server_url = "http://localhost:8983/solr/prop_search_core1"
+  config.rest_url_prefix = "http://data.bioontology.org/"
+  config.enable_security = false
+
+  #caches
+  config.http_redis_host = "localhost"
+  config.http_redis_port = 6379
+  config.goo_redis_host = "localhost"
+  config.goo_redis_port = 6379
+
+  #Ontology Analytics Redis
+  config.ontology_analytics_redis_host = "localhost"
+  config.ontology_analytics_redis_port = 6379
+end
+
+Annotator.config do |config|
+  config.mgrep_dictionary_file ||= "./test/tmp/dict"
+  config.stop_words_default_file ||= "./config/default_stop_words.txt"
+  config.mgrep_host            ||= "localhost"
+  config.mgrep_port            ||= 55555
+  config.annotator_redis_host = "localhost"
+  config.annotator_redis_port = 6379
+  config.enable_recognizer_param = false
+end
+
+LinkedData::OntologiesAPI.config do |config|
+  config.resolver_redis_host = "localhost"
+  config.resolver_redis_port = 6379
+  config.restrict_download = ["ACR0", "ACR1", "ACR2"]
+end

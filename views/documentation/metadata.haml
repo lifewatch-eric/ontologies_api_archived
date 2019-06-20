@@ -1,0 +1,53 @@
+-routes = routes_by_class[@metadata[:cls]]
+-return "" if routes.nil? || routes.empty?
+%h3.text-success{id: @metadata[:cls].name.split("::").last}= @metadata[:uri]
+%div.resource
+  %div.collection_link
+    =resource_collection_link(@metadata[:cls])
+
+  -if routes
+    %h4 HTTP Methods for Resource
+    %table.table.table-striped.table-bordered
+      %tr
+        %th HTTP Verb
+        %th <abbr title="The path below may contain tokens starting with ':', which need to be replaced with the appropriate value in order to construct a URL. However, we highly recommend navigating to URLs via the provided hypermedia links.">Path</abbr>
+      -routes.each do |route|
+        %tr
+          %td= route[0]
+          %td= route[1]
+
+  %h4 Resource Description
+  %table.table.table-striped.table-bordered
+    %tr
+      %th Attribute
+      %th <abbr title="Indication of whether the attribute shows by default, use `include=all` to show all attributes.">Default</abbr>
+      %th <abbr title="Unique attributes will have a unique value across all of the resources of this type.">Unique</abbr>
+      %th <abbr title="Required attributes will always need to be present in order for the resource to be valid">Required</abbr>
+      %th <abbr title="List indicates if the attribute contains a list or single value">List</abbr>
+      %th <abbr title="Some attributes contain a link to another resource. This is indicated by the `type` column.">Type</abbr>
+    -attr_rows = []
+    -@metadata[:attributes].each do |attr, values|
+      -attr_rows << [attr.to_s, values[:shows_default], values[:unique], values[:required], values[:list], values[:type].to_s + "&nbsp;"]
+    / Sort to surface the 'true' values, but the fields are mangled badly here :(
+    -attr_rows.sort! {|a,b| b[1].to_s.gsub("&nbsp;", "") <=> a[1].to_s.gsub("&nbsp;", "")}
+    -attr_rows.each do |row|
+      %tr
+        %td= row[0]
+        %td= row[1]
+        %td= row[2]
+        %td= row[3]
+        %td= row[4]
+        %td= row[5]
+
+  -links = LinkedData::Hypermedia.generate_links(sample_objects[@metadata[:cls].type_uri])
+  -if links && !links.empty?
+    %h4 Related Hypermedia Links
+    %table.table.table-striped.table-bordered
+      %tr
+        %th Type
+        %th URL
+      -links.each do |link, uri|
+        %tr
+          %td= link
+          %td
+            %a{href: uri}= uri

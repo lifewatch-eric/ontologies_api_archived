@@ -1,0 +1,66 @@
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+log/**
+logs/**
+.tags*
+cache/**
+vendor/bundle/*
+
+
+# YARD artifacts
+.yardoc
+_yardoc
+doc/
+
+# Only the bins we want
+bin/**
+!bin/owlapi_wrapper.jar
+
+# Mac artifacts
+**.DS_Store
+
+# Support local configs
+config/environments/*
+!config/environments/config.rb
+!config/environments/config.rb.sample
+
+#ignore capistrano deployment
+config/deploy/*
+config/*.p12
+
+# Ignore generated test data
+test/data/uploaded_ontologies/**/*
+test/data/ontology_files/repo/**/*
+
+# Ignore RubyMine editor files
+.idea
+
+*.swp
+
+.ruby-version
+
+
+
+
+config/environments/console.rb
+
+config/environments/stage.rb
+
+config/environments/benchmark.rb
+
+test/test_run.log
+
+test/data/ontology_files/catalog-v001.xml
+
+create_permissions.log
