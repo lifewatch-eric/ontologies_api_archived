@@ -32,7 +32,7 @@ require_relative 'lib/rack/param_translator'
 require_relative 'lib/rack/slice_detection'
 
 # Logging setup
-require_relative "config/logging"
+require_relative 'config/logging'
 
 # Inflector setup
 require_relative "config/inflections"

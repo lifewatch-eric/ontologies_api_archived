@@ -39,9 +39,83 @@ class OntologiesController < ApplicationController
         latest = ont.latest_submission(status: :any)
       end
       check_last_modified(latest) if latest
-      latest.bring(*OntologySubmission.goo_attrs_to_load(includes_param)) if latest
+      latest.bring(*OntologySubmission.goo_attrs_to_load(includes_param, -2)) if latest
       reply(latest || {})
     end
+
+    # Ontology latest submission datacite metadata as Json
+    get "/:acronym/latest_submission/datacite_metadata_json" do
+      begin
+        ont = Ontology.find(params["acronym"]).first
+        error 404, "You must provide a valid `acronym` to retrieve an ontology" if ont.nil?
+        include_status = params["include_status"]
+        ont.bring(:acronym, :submissions)
+        if include_status
+          latest = ont.latest_submission(status: include_status.to_sym)
+        else
+          latest = ont.latest_submission(status: :any)
+        end
+        check_last_modified(latest) if latest
+        latest.bring(*OntologySubmission.goo_attrs_to_load(includes_param, -2)) if latest
+        if(latest)
+          return getDataciteMetadataJSON(latest)
+        else
+          reply {}
+        end
+      rescue => e
+        LOGGER.debug("ONTOLOGIES_API - ontologies_controller.rb - datacite_metadata_json - ECCEZIONE : #{e.message}\n#{e.backtrace.join("\n")}")
+        raise e
+      end
+    end
+
+
+    get "/:acronym/latest_submission/ecoportal_metadata_json" do
+      begin
+        ont = Ontology.find(params["acronym"]).first
+        error 404, "You must provide a valid `acronym` to retrieve an ontology" if ont.nil?
+        include_status = params["include_status"]
+        ont.bring(:acronym, :submissions)
+        if include_status
+          latest = ont.latest_submission(status: include_status.to_sym)
+        else
+          latest = ont.latest_submission(status: :any)
+        end
+        check_last_modified(latest) if latest
+        latest.bring(*OntologySubmission.goo_attrs_to_load(includes_param, -2)) if latest
+        if(latest)
+          return getEcoportalMetadataJSON(latest)
+        else
+          reply {}
+        end
+      rescue => e
+        LOGGER.debug("ONTOLOGIES_API - ontologies_controller.rb - datacite_metadata_json - ECCEZIONE : #{e.message}\n#{e.backtrace.join("\n")}")
+        raise e
+      end
+    end
+
+    # get "/:acronym/latest_submission/datacite_metadata_json2" do
+    #   begin
+    #     ont = Ontology.find(params["acronym"]).first
+    #     error 404, "You must provide a valid `acronym` to retrieve an ontology" if ont.nil?
+    #     include_status = params["include_status"]
+    #     ont.bring(:acronym, :submissions)
+    #     if include_status
+    #       latest = ont.latest_submission(status: include_status.to_sym)
+    #     else
+    #       latest = ont.latest_submission(status: :any)
+    #     end
+    #     check_last_modified(latest) if latest
+    #     latest.bring(*OntologySubmission.goo_attrs_to_load(includes_param, -2)) if latest
+    #     if(latest)
+    #       return latest.to_dataciteHash().to_json()
+    #     else
+    #       reply {}
+    #     end
+    #   rescue => e
+    #     LOGGER.debug("ONTOLOGIES_API - ontologies_controller.rb - datacite_metadata_json - ECCEZIONE : #{e.message}\n#{e.backtrace.join("\n")}")
+    #     raise e
+    #   end
+    # end
 
     ##
     # Create an ontology
@@ -58,13 +132,17 @@ class OntologiesController < ApplicationController
     ##
     # Update an ontology
     patch '/:acronym' do
+      # LOGGER.debug("\n==============================\n ONTOLOGIES_API - ontologies_controller -> PATCH action")
+      #LOGGER.debug(" \n\n   > params: #{params.inspect}")
       ont = Ontology.find(params["acronym"]).include(Ontology.attributes).first
       error 422, "You must provide an existing `acronym` to patch" if ont.nil?
 
       populate_from_params(ont, params)
       if ont.valid?
         ont.save
+        #LOGGER.debug(" \n\n   > ont: #{ont.inspect}")
       else
+        LOGGER.debug("\n\n ERROR! ONTOLOGIES_API - ontologies_controller#PATCH : #{ont.errors.inspect} ")
         error 422, ont.errors
       end
 
@@ -158,35 +236,55 @@ class OntologiesController < ApplicationController
     ##
     # Display all ontologies with submissions and metrics
     get do
-      resp = []
-      onts = nil
-      allow_views = params['also_include_views'] ||= false
+      # LOGGER.debug("\n=======================\n API - ontologies_controller -> ontologies_full: ")
+      begin
+        resp = []
+        onts = nil
+        allow_views = params['also_include_views'] ||= false
 
-      if allow_views
-        onts = Ontology.where.include(Ontology.goo_attrs_to_load(includes_param)).to_a
-      else
-        onts = Ontology.where.filter(Goo::Filter.new(:viewOf).unbound).include(Ontology.goo_attrs_to_load(includes_param)).to_a
-      end
-      options = {also_include_views: allow_views, status: (params["include_status"] || "ANY")}
-      subs = retrieve_latest_submissions(options)
-      metrics_include = LinkedData::Models::Metric.goo_attrs_to_load(includes_param)
-      LinkedData::Models::OntologySubmission.where.models(subs.values).include(metrics: metrics_include).all
-
-      onts.each do |ont|
-        sub = subs[ont.acronym]
-        sub.ontology = nil if sub
-        metrics = nil
-
-        begin
-          metrics = sub.nil? ? nil : sub.metrics
-        rescue
-          metrics = nil
+        if allow_views
+          #LOGGER.debug("\n\n onts = Ontology.where.include(Ontology.goo_attrs_to_load(includes_param)).to_a")
+          onts = Ontology.where.include(Ontology.goo_attrs_to_load(includes_param)).to_a
+        else
+          #LOGGER.debug("\n\n onts = Ontology.where.filter(Goo::Filter.new(:viewOf).unbound).include(Ontology.goo_attrs_to_load(includes_param)).to_a")
+          onts = Ontology.where.filter(Goo::Filter.new(:viewOf).unbound).include(Ontology.goo_attrs_to_load(includes_param)).to_a
         end
+        #LOGGER.debug("\n\n onts = #{onts.inspect}")
+        options = {also_include_views: allow_views, status: (params["include_status"] || "ANY")}
+        subs = retrieve_latest_submissions(options)
+        #LOGGER.debug("\n\n subs = #{subs.inspect}")
+        metrics_include = LinkedData::Models::Metric.goo_attrs_to_load(includes_param)
+        #LOGGER.debug("\n\n subs = #{metrics_include.inspect}")
+        #cancellami = LinkedData::Models::OntologySubmission.where.models(subs.values).include(metrics: metrics_include).all
+        #LOGGER.debug("\n\n cancellami = #{cancellami.inspect}")
+        onts.each do |ont|
+          begin
+            #LOGGER.debug("\n    - - - - -\n ont = #{ont.inspect}")
+            sub = subs[ont.acronym]
+            sub.ontology = nil if sub
+            metrics = nil
+            #LOGGER.debug("\n    - - - - -\n sub = #{sub.inspect}")
+            begin
+              metrics = sub.nil? ? nil : sub.metrics
+            rescue
+              metrics = nil
+            end
+            #LOGGER.debug("\n    - - - - -\n metrics = #{metrics.inspect}")
+            resp << {ontology: ont, latest_submission: subs[ont.acronym], metrics: metrics}
 
-        resp << {ontology: ont, latest_submission: subs[ont.acronym], metrics: metrics}
+            #LOGGER.debug("\n    - - - - -\n resp = #{resp.inspect}")
+          rescue => e1
+            LOGGER.debug("\n\n >>>>> ECCEZIONE - API - ontologies_controller -> ontologies_full: #{e1.message}\n#{e1.backtrace.join("\n")}")
+            raise e1
+          end
+        end
+      rescue => e
+        LOGGER.debug("\n\n #ECCEZIONE - API - ontologies_controller -> ontologies_full: #{e.message}\n#{e.backtrace.join("\n")}")
+        raise e
       end
-
+      #LOGGER.debug("\n\n reply resp")
       reply resp
     end
   end
+
 end

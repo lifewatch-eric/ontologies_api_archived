@@ -4,8 +4,11 @@ class ClassesController < ApplicationController
 
     # Display a page for all classes
     get do
+      #LOGGER.debug(" ONTOLOGIES_API - classes_controller -> GET:")
       includes_param_check
       ont, submission = get_ontology_and_submission
+      #LOGGER.debug("\n\n   > ont:#{ont.inspect} \n\n   > submission:#{submission.inspect}")
+
       cls_count = submission.class_count(LOGGER)
       error 403, "Unable to display classes due to missing metrics for #{submission.id.to_s}. Please contact the administrator." if cls_count < 0
       check_last_modified_segment(LinkedData::Models::Class, [ont.acronym])

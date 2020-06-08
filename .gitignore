@@ -67,3 +67,7 @@ create_permissions.log
 
 
 TAGS
+controllers/test_controller.rb
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/ontologies_api/v15/.suo
