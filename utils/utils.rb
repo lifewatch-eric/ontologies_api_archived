@@ -189,8 +189,10 @@ module OntologiesApi
         #Transform hash attributes to be compatible with the Datacite Standard
         
         # NAME IDENTIFIER
-        objDC[:creators].map do |c|
-          c[:nameIdentifiers] = c.delete :creatorIdentifiers if(c[:creatorIdentifiers])
+        unless objDC[:creators].nil?
+          objDC[:creators].map do |c|
+            c[:nameIdentifiers] = c.delete :creatorIdentifiers if(c[:creatorIdentifiers])
+          end
         end
 
         #if(!objDC[:identifierType].nil? && [LinkedData::Models::IdentifierRequestType.DOI_CREATE, LinkedData::Models::IdentifierRequestType.DOI_UPDATE].include? objDC[:identifierType])
@@ -263,8 +265,10 @@ module OntologiesApi
         #Transform hash attributes to be compatible with the Datacite Standard
         
         # NAME IDENTIFIER
-        objDC[:creators].map do |c|
-          c[:nameIdentifiers] = c.delete :creatorIdentifiers if(c[:creatorIdentifiers])
+        unless objDC[:creators].nil?
+          objDC[:creators].map do |c|
+            c[:nameIdentifiers] = c.delete :creatorIdentifiers if(c[:creatorIdentifiers])
+          end
         end
         
         #DOI
