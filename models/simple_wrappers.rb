@@ -29,3 +29,15 @@ ProvisionalClass = LinkedData::Models::ProvisionalClass
 ProvisionalRelation = LinkedData::Models::ProvisionalRelation
 
 SearchHelper = Sinatra::Helpers::SearchHelper
+
+Contact = LinkedData::Models::Contact
+
+Creator = LinkedData::Models::Creator
+
+CreatorIdentifier = LinkedData::Models::CreatorIdentifier
+
+Affiliation = LinkedData::Models::Affiliation
+
+Title = LinkedData::Models::Title
+
+IdentifierRequest = LinkedData::Models::IdentifierRequest

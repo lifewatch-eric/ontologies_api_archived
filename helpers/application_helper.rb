@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'date'
+require_relative '../utils/utils'
 
 module Sinatra
   module Helpers
@@ -17,81 +18,139 @@ module Sinatra
       # TODO: Currerntly, this allows for mass-assignment of everything, which will permit
       # users to overwrite any attribute, including things like passwords.
       def populate_from_params(obj, params)
-        return if obj.nil?
+        begin #ecoportal: catch exception
+          # LOGGER.debug(" ONTOLOGIES_API - application_helper->populate_from_params: \n\n    > obj:#{obj.nil? ? "nil" : obj.inspect}\n\n    > params:#{params.nil? ? "nil" : params.inspect}")
+          return if obj.nil?
 
-        # Make sure everything is loaded
-        if obj.is_a?(LinkedData::Models::Base)
-          obj.bring_remaining unless !obj.exist?
-        end
-
-        params.each do |attribute, value|
-          next if value.nil?
-
-          # Deal with empty strings
-          empty_string = value.is_a?(String) && value.empty?
-          old_string_value_exists = obj.respond_to?(attribute) && obj.send(attribute).is_a?(String)
-          if old_string_value_exists && empty_string
-            value = nil
-          elsif empty_string
-            next
+          # Make sure everything is loaded
+          if obj.is_a?(LinkedData::Models::Base)
+            #LOGGER.debug("\n\n   > obj.is_a?(LinkedData::Models::Base)")
+            obj.bring_remaining unless !obj.exist?
           end
+          # LOGGER.debug(" \n\n @@@ ONTOLOGIES_API - application_helper->populate_from_params - EACH 1 - params = #{params.inspect}")
+          params.each do |attribute, value|
+            # LOGGER.debug("\n\n>>>>>>>>>>>>>> attribute: #{attribute}, value: #{value} <<<<<<<<<<<<<<")
+            next if value.nil?
 
-          attribute = attribute.to_sym
-          attr_cls = obj.class.range(attribute)
-          attribute_settings = obj.class.attribute_settings(attribute)
-
-          not_hash_or_array = !value.is_a?(Hash) && !value.is_a?(Array)
-          not_array_of_hashes = value.is_a?(Array) && !value.first.is_a?(Hash)
-
-          if attr_cls == LinkedData::Models::Class
-            # Try to find dependent Goo objects, but only if the naming is not done via Proc
-            # If naming is done via Proc, then try to lookup the Goo object using a hash of attributes
-            is_arr = value.is_a?(Array)
-            value = is_arr ? value : [value]
-            new_value = []
-            value.each do |cls|
-              sub = LinkedData::Models::Ontology.find(uri_as_needed(cls["ontology"])).first.latest_submission
-              new_value << LinkedData::Models::Class.find(cls["class"]).in(sub).first
+            # Deal with empty strings
+            
+            empty_string = value.is_a?(String) && value.empty?
+            old_string_value_exists = obj.respond_to?(attribute) && obj.send(attribute).is_a?(String)
+            #LOGGER.debug("\n      - empty_string: #{empty_string}, \n      - old_string_value_exists: #{old_string_value_exists}")
+            if old_string_value_exists && empty_string
+              value = nil
+            elsif empty_string
+              next
             end
-            value = is_arr ? new_value : new_value[0]
-          elsif attr_cls && not_hash_or_array || (attr_cls && not_array_of_hashes)
-            # Replace the initial value with the object, handling Arrays as appropriate
-            if value.is_a?(Array)
-              value = value.map {|e| attr_cls.find(uri_as_needed(e)).include(attr_cls.attributes).first}
-            else
-              value = attr_cls.find(uri_as_needed(value)).include(attr_cls.attributes).first
-            end
-          elsif attr_cls
-            # Check to see if the resource exists in the triplestore
-            if value.is_a?(Array)
-              retrieved_values = []
-              value.each do |e|
-                retrieved_value = attr_cls.where(e.symbolize_keys).first
-                if retrieved_value
-                  retrieved_values << retrieved_value
-                else
-                  retrieved_values << populate_from_params(attr_cls.new, e.symbolize_keys).save
+
+            attribute = attribute.to_sym
+            attr_cls = obj.class.range(attribute)
+            attribute_settings = obj.class.attribute_settings(attribute)
+            not_hash_or_array = !value.is_a?(Hash) && !value.is_a?(Array)
+            not_array_of_hashes = value.is_a?(Array) && !value.first.is_a?(Hash)
+
+            #LOGGER.debug("\n      - attr_cls: #{attr_cls} \n      - attribute_settings: #{attribute_settings.inspect} \n      - not_hash_or_array: #{not_hash_or_array} \n      - not_array_of_hashes: #{not_array_of_hashes.inspect}  \n      - value.is_a?(Array): #{value.is_a?(Array)}")
+            
+            if attr_cls == LinkedData::Models::Class
+              #LOGGER.debug("\n      - CASE A:")
+              # Try to find dependent Goo objects, but only if the naming is not done via Proc
+              # If naming is done via Proc, then try to lookup the Goo object using a hash of attributes
+              is_arr = value.is_a?(Array)
+              value = is_arr ? value : [value]
+              new_value = []
+              # LOGGER.debug(" \n\n @@@ ONTOLOGIES_API - application_helper->populate_from_params - EACH 2 - value = #{value.inspect}")
+              value.each do |cls|
+                sub = LinkedData::Models::Ontology.find(uri_as_needed(cls["ontology"])).first.latest_submission
+                new_value << LinkedData::Models::Class.find(cls["class"]).in(sub).first
+              end
+              value = is_arr ? new_value : new_value[0]
+            elsif attr_cls && not_hash_or_array || (attr_cls && not_array_of_hashes)
+              # Replace the initial value with the object, handling Arrays as appropriate
+              if value.is_a?(Array)
+                # LOGGER.debug("\n      - CASE B1:")
+                value = value.map {|e| attr_cls.find(uri_as_needed(e)).include(attr_cls.attributes).first}
+              else
+                # LOGGER.debug("\n      - CASE B2:")
+                value = attr_cls.find(uri_as_needed(value)).include(attr_cls.attributes).first
+              end
+            elsif attr_cls
+              # Check to see if the resource exists in the triplestore
+              if value.is_a?(Array)
+                # LOGGER.debug("\n      - CASE C1:")
+                retrieved_values = []
+                # LOGGER.debug(" \n\n @@@ ONTOLOGIES_API - application_helper->populate_from_params - EACH 3 - value = #{value.inspect}")
+                value.each do |elem|
+                  begin
+                    # LOGGER.debug("\n\n     ------------------------------------------------------------\n")
+                    symbolized_elem = OntologiesApi::Utils.recursive_symbolize_keys(elem, true, true)
+                    #LOGGER.debug("\n      - elem:#{elem.inspect} \n\n      - symbolized_elem: #{symbolized_elem}")
+                    retrieved_value = attr_cls.where(symbolized_elem).include(attr_cls.goo_attrs_to_load(includes_param, -2)).first
+                    #LOGGER.debug("\n\n      - retrieved_value:#{retrieved_value.nil? ? "nil" : retrieved_value.inspect}")
+                    # begin
+                    #   #LOGGER.debug("\n\n ONTOLOGIES_API - application_helper->populate_from_params (CALL to_hash) #{retrieved_value.to_hash()}")
+                    # rescue => e
+                    #   #LOGGER.debug("\n\n ECCEZIONE - ONTOLOGIES_API - application_helper->populate_from_params (CALL to_hash) #{e.message}")
+                    # end
+
+                    retrieved_value_h = retrieved_value ? (retrieved_value.to_hash rescue nil) : nil
+                    #LOGGER.debug("\n\n      - HASH of retrieved_value:#{retrieved_value_h.nil? ? "nil" : retrieved_value_h.inspect}")
+                    if(retrieved_value_h)
+                      #I found a similar object, but I have to verify if it is exactly the same (for example it has the same number of array's elements of the new object)
+                      #To compare these objects I need to transform them in comparable hash format, for example HASH with the same attributes, the same  with the same order of array's element.
+                      retrieved_value_h_symb = OntologiesApi::Utils.recursive_symbolize_keys(retrieved_value_h, true, true, [:id, :type, :links, :context, :created])
+                      retrieved_value_h_ord = OntologiesApi::Utils.order_inner_array_elements(retrieved_value_h_symb, true, true, [:id, :type, :links, :context, :created])
+                      
+                      ordered_elem = OntologiesApi::Utils.order_inner_array_elements(symbolized_elem, true, true, [:id, :type, :links, :context, :created])
+                      are_equivalent = ordered_elem.eql?(retrieved_value_h_ord) rescue ordered_elem == retrieved_value_h_ord
+                      #LOGGER.debug("\n\n\n\n\n ============>> ordered_elem = #{ordered_elem} \n\n\n ============>> retrieved_value_h_ord = #{retrieved_value_h_ord}")
+                      retrieved_value = are_equivalent ? retrieved_value : nil
+                    end
+
+                    if retrieved_value 
+                      # LOGGER.debug("\n      - C1-1 retrieved_values << retrieved_value")
+                      retrieved_values << retrieved_value
+                    else
+                      # LOGGER.debug("\n      - C1-2 recursive call -> pupolate_from_params -BEGIN ")
+                      temp_retrieved_value = populate_from_params(attr_cls.new, symbolized_elem).save
+                      retrieved_values << temp_retrieved_value
+                      #LOGGER.debug("\n      - C1-2 recursive call -> pupolate_from_params -END: value saved and added=#{temp_retrieved_value}")
+                      #retrieved_values << populate_from_params(attr_cls.new, e.symbolize_keys).save                   
+                    end
+                  rescue => e
+                    LOGGER.debug("\n\n ###### ONTOLOGIES_API - application_helper->populate_from_params: ECCEZIONE: #{e.message}\n#{e.backtrace.join("\n")}")
+                    raise e
+                  end
+                end
+              else
+                # LOGGER.debug("\n      - CASE C2:")
+                retrieved_values = attr_cls.where(value.symbolize_keys).to_a
+                unless retrieved_values
+                  temp_retrieved_value = populate_from_params(attr_cls.new, e.symbolize_keys).save
+                  retrieved_values = temp_retrieved_value
+                  #retrieved_values = populate_from_params(attr_cls.new, e.symbolize_keys).save
                 end
               end
-            else
-              retrieved_values = attr_cls.where(value.symbolize_keys).to_a
-              unless retrieved_values
-                retrieved_values = populate_from_params(attr_cls.new, e.symbolize_keys).save
-              end
+              value = retrieved_values
+            elsif attribute_settings && attribute_settings[:enforce] && attribute_settings[:enforce].include?(:date_time)
+              # LOGGER.debug("\n      - CASE D: :date_time")
+              # TODO: Remove this awful hack when obj.class.model_settings[:range][attribute] contains DateTime class
+              value = DateTime.parse(value)
+            elsif attribute_settings && attribute_settings[:enforce] && attribute_settings[:enforce].include?(:uri)
+              # LOGGER.debug("\n      - CASE E: :uri")
+              # TODO: Remove this awful hack when obj.class.model_settings[:range][attribute] contains RDF::IRI class
+              value = RDF::IRI.new(value)
             end
-            value = retrieved_values
-          elsif attribute_settings && attribute_settings[:enforce] && attribute_settings[:enforce].include?(:date_time)
-            # TODO: Remove this awful hack when obj.class.model_settings[:range][attribute] contains DateTime class
-            value = DateTime.parse(value)
-          elsif attribute_settings && attribute_settings[:enforce] && attribute_settings[:enforce].include?(:uri)
-            # TODO: Remove this awful hack when obj.class.model_settings[:range][attribute] contains RDF::IRI class
-            value = RDF::IRI.new(value)
-          end
 
-          # Don't populate naming attributes if they exist
-          if obj.class.model_settings[:name_with] != attribute || obj.send(attribute).nil?
-            obj.send("#{attribute}=", value) if obj.respond_to?("#{attribute}=")
+            # Don't populate naming attributes if they exist
+            if obj.class.model_settings[:name_with] != attribute || obj.send(attribute).nil?
+              #LOGGER.debug("\n      ++++++++ Set attribute: #{attribute} with value:#{value}")
+              obj.send("#{attribute}=", value) if obj.respond_to?("#{attribute}=")
+            end
           end
+          #LOGGER.debug("\n\n      - RETURN obj = #{obj.inspect}")
+        rescue => e
+          LOGGER.debug("\n\n ECCEZIONE - ONTOLOGIES_API - application_helper->populate_from_params: #{e.message} - \n #{e.backtrace.join("\n\t")}")
+          raise e
         end
         obj
       end
@@ -349,30 +408,41 @@ module Sinatra
       end
 
       def retrieve_latest_submissions(options = {})
-        status = (options[:status] || "RDF").to_s.upcase
-        include_ready = status.eql?("READY") ? true : false
-        status = "RDF" if status.eql?("READY")
-        any = true if status.eql?("ANY")
-        include_views = options[:also_include_views] || false
-        includes = OntologySubmission.goo_attrs_to_load(includes_param)
-        includes << :submissionStatus unless includes.include?(:submissionStatus)
-        if any
-          submissions_query = OntologySubmission.where
-        else
-          submissions_query = OntologySubmission.where(submissionStatus: [ code: status])
-        end
+        # LOGGER.debug("API - application_helper -> retrieve_latest_submissions:")
+        begin
+          status = (options[:status] || "RDF").to_s.upcase
+          include_ready = status.eql?("READY") ? true : false
+          status = "RDF" if status.eql?("READY")
+          any = true if status.eql?("ANY")
+          include_views = options[:also_include_views] || false
+          #includes = OntologySubmission.goo_attrs_to_load(includes_param)
+          includes = OntologySubmission.goo_attrs_to_load(includes_param, -2) #modifica ecoportal: includo tutti gli attributi annidati
+          # includes << {:creators => [:affiliations => [:affiliationIdentifierScheme, :affiliationIdentifier, :affiliation]]} #modifica ecoportal
+          # includes << {:creators => [:creatorIdentifiers => [:nameIdentifierScheme, :schemeURI, :nameIdentifier]]} #modifica ecoportal
+          includes << :submissionStatus unless includes.include?(:submissionStatus)
+          #LOGGER.debug("     -> includes: #{includes.inspect}")
+          if any
+            submissions_query = OntologySubmission.where
+          else
+            submissions_query = OntologySubmission.where(submissionStatus: [ code: status])
+          end
 
-        submissions_query = submissions_query.filter(Goo::Filter.new(ontology: [:viewOf]).unbound) unless include_views
-        submissions = submissions_query.include(includes).to_a
+          submissions_query = submissions_query.filter(Goo::Filter.new(ontology: [:viewOf]).unbound) unless include_views
+          submissions = submissions_query.include(includes).to_a
 
-        # Figure out latest parsed submissions using all submissions
-        latest_submissions = {}
-        submissions.each do |sub|
-          next if include_ready && !sub.ready?
-          next if sub.ontology.nil?
-          latest_submissions[sub.ontology.acronym] ||= sub
-          latest_submissions[sub.ontology.acronym] = sub if sub.submissionId.to_i > latest_submissions[sub.ontology.acronym].submissionId.to_i
+          # Figure out latest parsed submissions using all submissions
+          latest_submissions = {}
+          submissions.each do |sub|
+            next if include_ready && !sub.ready?
+            next if sub.ontology.nil?
+            latest_submissions[sub.ontology.acronym] ||= sub
+            latest_submissions[sub.ontology.acronym] = sub if sub.submissionId.to_i > latest_submissions[sub.ontology.acronym].submissionId.to_i
+          end
+        rescue => e
+          LOGGER.debug("\n\n API - application_helper -> retrieve_latest_submissions: ECCEZIONE: #{e.message}\n#{e.backtrace.join("\n")}")
+          raise e
         end
+        
         return latest_submissions
       end
 

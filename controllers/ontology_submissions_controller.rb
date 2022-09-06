@@ -22,7 +22,8 @@ class OntologySubmissionsController < ApplicationController
       ont = Ontology.find(params["acronym"]).include(:acronym).first
       error 422, "Ontology #{params["acronym"]} does not exist" unless ont
       check_last_modified_segment(LinkedData::Models::OntologySubmission, [ont.acronym])
-      ont.bring(submissions: OntologySubmission.goo_attrs_to_load(includes_param))
+      # ont.bring(submissions: OntologySubmission.goo_attrs_to_load(includes_param))
+      ont.bring(submissions: OntologySubmission.goo_attrs_to_load(includes_param,-2)) # modifica ecoportal
       reply ont.submissions.sort {|a,b| b.submissionId.to_i <=> a.submissionId.to_i }  # descending order of submissionId
     end
 
@@ -42,8 +43,27 @@ class OntologySubmissionsController < ApplicationController
       ont.bring(:submissions)
       ont_submission = ont.submission(params["ontology_submission_id"])
       error 404, "`submissionId` not found" if ont_submission.nil?
-      ont_submission.bring(*OntologySubmission.goo_attrs_to_load(includes_param))
+      #ont_submission.bring(*OntologySubmission.goo_attrs_to_load(includes_param))
+      ont_submission.bring(*OntologySubmission.goo_attrs_to_load(includes_param, -2)) # modifica ecoportal
       reply ont_submission
+    end
+
+    # Ontology a submission datacite metadata as Json
+    get "/:ontology_submission_id/datacite_metadata_json" do
+      begin
+        # LOGGER.debug("ONTOLOGIES_API - ontology_submissions_controller.rb - datacite_metadata_json")
+        ont = Ontology.find(params["acronym"]).include(:acronym).first
+        check_last_modified_segment(LinkedData::Models::OntologySubmission, [ont.acronym])
+        ont.bring(:submissions)
+        ont_submission = ont.submission(params["ontology_submission_id"])
+        error 404, "`submissionId` not found" if ont_submission.nil?
+        #ont_submission.bring(*OntologySubmission.goo_attrs_to_load(includes_param))
+        ont_submission.bring(*OntologySubmission.goo_attrs_to_load(includes_param, -2)) # modifica ecoportal        
+        return getDataciteMetadataJSON(ont_submission)        
+      rescue => e
+        LOGGER.debug("ONTOLOGIES_API - ontology_submissions_controller.rb - datacite_metadata_json - ECCEZIONE : #{e.message}\n#{e.backtrace.join("\n")}")
+        raise e
+      end
     end
 
     ##

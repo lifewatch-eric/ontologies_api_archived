@@ -15,7 +15,11 @@ class ReviewsController < ApplicationController
     # Return an array of all reviews.
     get do
       check_last_modified_collection(MODEL)
-      reply MODEL.where.include(MODEL.goo_attrs_to_load(includes_param)).to_a
+      allReviews = MODEL.where.include(MODEL.goo_attrs_to_load(includes_param)).to_a
+      sort = params["sort"].eql?('true') || params["sort"].eql?('1')  # default = false
+      MODEL.sort_reviews! allReviews if sort
+
+      reply allReviews
     end
 
     get '/:review_id' do

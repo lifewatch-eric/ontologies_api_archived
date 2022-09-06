@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require_relative '../utils/utils'
 
 module Sinatra
   module Helpers
@@ -55,6 +56,7 @@ module Sinatra
       ##
       # Add a file to the submission if a file exists in the params
       def add_file_to_submission(ont, submission)
+        # LOGGER.debug(" ONTOLOGIES_API - ontology_helper->add_file_to_submission:")
         filename, tmpfile = file_from_request
         if tmpfile
           if filename.nil?
@@ -70,6 +72,27 @@ module Sinatra
           submission.uploadFilePath = file_location
         end
         return filename, tmpfile
+      end
+
+      def getDataciteMetadataJSON(sub)
+        begin          
+          json = OntologiesApi::Utils.getDataciteMetadataJSON(sub)
+          json        
+        rescue => e
+          LOGGER.debug("ONTOLOGIES_API - ontology_helper.rb - getDataciteMetadataJSON - ECCEZIONE : #{e.message}\n#{e.backtrace.join("\n")}")
+          raise e
+        end
+      end
+
+      
+      def getEcoportalMetadataJSON(sub)
+        begin          
+          json = OntologiesApi::Utils.getEcoportalMetadataJSON(sub)
+          json        
+        rescue => e
+          LOGGER.debug("ONTOLOGIES_API - ontology_helper.rb - getEcoportalMetadataJSON - ECCEZIONE : #{e.message}\n#{e.backtrace.join("\n")}")
+          raise e
+        end
       end
     end
   end

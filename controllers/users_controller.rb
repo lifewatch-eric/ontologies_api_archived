@@ -1,6 +1,10 @@
+require 'json'
+require 'logger'
+
 class UsersController < ApplicationController
   namespace "/users" do
     post "/authenticate" do
+      # LOGGER.debug("Prova LOGGER /authenticate")
       user_id       = params["user"]
       user_password = params["password"]
       # Modify params to show all user attributes
@@ -18,14 +22,17 @@ class UsersController < ApplicationController
     # to click and login to the UI. The token can then be provided to
     # the /reset_password endpoint to actually reset the password.
     post "/create_reset_password_token" do
+      # LOGGER.debug("ENDPOINT: create_reset_password_token:")
       email    = params["email"]
       username = params["username"]
       user = LinkedData::Models::User.where(email: email, username: username).include(LinkedData::Models::User.attributes).first
+      # LOGGER.debug("Prova LOGGER create_reset_password_token") unless user
       error 404, "User not found" unless user
       reset_token = token(36)
       user.resetToken = reset_token
       if user.valid?
         user.save(override_security: true)
+        # LOGGER.debug("Call  LinkedData::Utils::Notifications.reset_password")
         LinkedData::Utils::Notifications.reset_password(user, reset_token)
       else
         error 422, user.errors
@@ -39,12 +46,14 @@ class UsersController < ApplicationController
     # can be used to log a user in. This will allow them to change their
     # password and update the user object.
     post "/reset_password" do
+      # LOGGER.debug("Prova LOGGER /reset_password")
       email             = params["email"] || ""
       username          = params["username"] || ""
       token             = params["token"] || ""
       params["display"] = User.attributes.join(",") # used to serialize everything via the serializer
       user = LinkedData::Models::User.where(email: email, username: username).include(User.goo_attrs_to_load(includes_param)).first
       error 404, "User not found" unless user
+        
       if token.eql?(user.resetToken)
         user.show_apikey = true
         reply user
@@ -62,9 +71,11 @@ class UsersController < ApplicationController
     # Display a single user
     get '/:username' do
       user = User.find(params[:username]).first
-      error 404, "Cannot find user with username `#{params['username']}`" if user.nil?
+      error 404, "WARN!! Cannot find user with username `#{params['username']}`" if user.nil?
+      # LOGGER.debug("user_controller.rb -> get #{params[:username]} : #{user.to_json}") #Ecoportal
       check_last_modified(user)
       user.bring(*User.goo_attrs_to_load(includes_param))
+      user.show_apikey = true if @params["show_apikey"] == "true" && Thread.current[:remote_user]&.username == params['username']
       reply user
     end
 
@@ -92,8 +103,23 @@ class UsersController < ApplicationController
 
     # Delete a user
     delete '/:username' do
-      User.find(params[:username]).first.delete
-      halt 204
+      # LOGGER.debug("user_controller.rb -> delete/#{params[:username]} :")
+      user = User.find(params[:username]).first
+      if user.nil?
+        # LOGGER.debug(" > User not found")
+        halt 404
+      else
+        # LOGGER.debug(" > #{user.to_json}")
+
+        begin  
+          user.delete unless user.nil?
+        rescue => e
+          # LOGGER.debug("ERROR in user_controller.rb -> delete: #{e.class}:#{e.message} :'")
+          raise e
+        end
+
+        halt 204
+      end
     end
 
     private
@@ -117,5 +143,6 @@ class UsersController < ApplicationController
       end
       reply 201, user
     end
+    
   end
 end

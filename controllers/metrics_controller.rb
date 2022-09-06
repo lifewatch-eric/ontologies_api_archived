@@ -18,7 +18,7 @@ class MetricsController < ApplicationController
           begin
             x.metrics.submission
           rescue
-            LOGGER.error("submission with inconsistent metrics #{x.id.to_s}")
+            #LOGGER.error("submission with inconsistent metrics #{x.id.to_s}")
             to_remove << x
           end
         end
