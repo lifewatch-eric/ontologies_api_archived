@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/lifewatch-eric/ncbo_cron.git
-  revision: bf658e832e6be30493c3837f8a1c2ecc7c7b35cb
+  revision: 3b8ccb6376e4c5cdd8546dc3a91e5693fec16144
   branch: master
   specs:
     ncbo_cron (0.0.1)
@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: https://github.com/lifewatch-eric/ontologies_linked_data.git
-  revision: a09337d5f467578a97a7b6ce50974518231ba7b8
+  revision: 4ea983a1afcbffff64fb17399e32024dadc2c63b
   branch: master
   specs:
     ontologies_linked_data (0.0.1)
