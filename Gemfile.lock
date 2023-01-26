@@ -38,17 +38,18 @@ GIT
 
 GIT
   remote: https://github.com/ncbo/goo.git
-  revision: 6fcab82f5abbaf08a4a0104d00ada0b40a322a31
+  revision: d0dd816a0afd5b85a02c4b909502cf3a93e6be58
   branch: master
   specs:
     goo (0.0.2)
-      addressable (~> 2.8)
+      addressable (= 2.3.5)
       pry
       rdf (= 1.0.8)
       redis
       rest-client
       rsolr
       sparql-client
+      systemu
       uuid
 
 GIT
@@ -126,8 +127,7 @@ GEM
     activesupport (3.2.22.5)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
-    addressable (2.8.1)
-      public_suffix (>= 2.0.2, < 6.0)
+    addressable (2.3.5)
     airbrussh (1.4.0)
       sshkit (>= 1.6.1, != 1.7.0)
     backports (3.23.0)
@@ -147,11 +147,9 @@ GEM
       capistrano (~> 3.1)
       sshkit (~> 1.3)
     coderay (1.1.3)
-    concurrent-ruby (1.2.0)
-    connection_pool (2.3.0)
+    concurrent-ruby (1.1.9)
     cube-ruby (0.0.3)
     dante (0.2.0)
-    date (3.3.3)
     declarative (0.0.20)
     docile (1.4.0)
     domain_name (0.5.20190701)
@@ -164,9 +162,9 @@ GEM
     elasticsearch-transport (2.0.0)
       faraday
       multi_json
-    ethon (0.16.0)
+    ethon (0.15.0)
       ffi (>= 1.15.0)
-    faraday (1.10.3)
+    faraday (1.10.0)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
       faraday-excon (~> 1.1)
@@ -182,8 +180,8 @@ GEM
     faraday-em_synchrony (1.0.0)
     faraday-excon (1.1.0)
     faraday-httpclient (1.0.1)
-    faraday-multipart (1.0.4)
-      multipart-post (~> 2)
+    faraday-multipart (1.0.3)
+      multipart-post (>= 1.2, < 3)
     faraday-net_http (1.0.1)
     faraday-net_http_persistent (1.2.0)
     faraday-patron (1.0.0)
@@ -213,27 +211,24 @@ GEM
       tilt
     hashie (5.0.0)
     http-accept (1.7.0)
-    http-cookie (1.0.5)
+    http-cookie (1.0.4)
       domain_name (~> 0.5)
     httpclient (2.8.3)
     hurley (0.2)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    json (2.6.3)
+    json (2.6.2)
     json-schema (2.5.0)
       addressable (~> 2.3)
-    json_pure (2.6.3)
-    jwt (2.6.0)
+    json_pure (2.6.1)
+    jwt (2.3.0)
     kgio (2.11.4)
-    libxml-ruby (4.0.0)
-    logger (1.5.3)
+    libxml-ruby (3.2.3)
+    logger (1.5.1)
     macaddr (1.7.2)
       systemu (~> 2.6.5)
-    mail (2.8.0.1)
+    mail (2.7.1)
       mini_mime (>= 0.1.1)
-      net-imap
-      net-pop
-      net-smtp
     memoist (0.16.2)
     method_source (1.0.0)
     mime-types (3.4.1)
@@ -246,28 +241,19 @@ GEM
       redis
     multi_json (1.15.0)
     multi_xml (0.6.0)
-    multipart-post (2.2.3)
+    multipart-post (2.1.1)
     mysql2 (0.5.2)
     net-http-persistent (2.9.4)
-    net-imap (0.3.4)
-      date
-      net-protocol
-    net-pop (0.1.2)
-      net-protocol
-    net-protocol (0.2.1)
-      timeout
     net-scp (3.0.0)
       net-ssh (>= 2.6.5, < 7.0.0)
-    net-smtp (0.3.3)
-      net-protocol
     net-ssh (6.1.0)
     netrc (0.11.0)
     newrelic_rpm (8.5.0)
-    oauth2 (2.0.9)
+    oauth2 (2.0.8)
       faraday (>= 0.17.3, < 3.0)
       jwt (>= 1.0, < 3.0)
       multi_xml (~> 0.5)
-      rack (>= 1.2, < 4)
+      rack (>= 1.2, < 3)
       snaky_hash (~> 2.0)
       version_gem (~> 1.1)
     oj (2.18.5)
@@ -277,10 +263,9 @@ GEM
     parseconfig (1.1.2)
     pony (1.13.1)
       mail (>= 2.0)
-    pry (0.14.2)
+    pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    public_suffix (5.0.1)
     rack (1.6.13)
     rack-accept (0.4.5)
       rack (>= 0.4)
@@ -294,8 +279,8 @@ GEM
       rack (>= 1.2.0)
     rack-protection (1.5.5)
       rack
-    rack-test (2.0.2)
-      rack (>= 1.3)
+    rack-test (1.1.0)
+      rack (>= 1.0, < 3)
     rack-timeout (0.6.0)
     rainbows (5.2.1)
       kgio (~> 2.5)
@@ -307,13 +292,10 @@ GEM
       addressable (>= 2.2)
     recursive-open-struct (1.1.3)
     redcarpet (3.5.1)
-    redis (5.0.6)
-      redis-client (>= 0.9.0)
+    redis (4.6.0)
     redis-activesupport (4.1.5)
       activesupport (>= 3, < 5)
       redis-store (~> 1.1.0)
-    redis-client (0.12.1)
-      connection_pool
     redis-rack-cache (1.2.4)
       rack-cache (~> 1.2)
       redis-store (~> 1.1.0)
@@ -338,7 +320,7 @@ GEM
     rubyzip (2.3.2)
     rufus-scheduler (2.0.24)
       tzinfo (>= 0.3.22)
-    sequel (5.64.0)
+    sequel (5.54.0)
     signet (0.15.0)
       addressable (~> 2.3)
       faraday (>= 0.17.3, < 2.0)
@@ -363,16 +345,15 @@ GEM
       rack-test
       sinatra (~> 1.4.0)
       tilt (>= 1.3, < 3)
-    snaky_hash (2.0.1)
+    snaky_hash (2.0.0)
       hashie
-      version_gem (~> 1.1, >= 1.1.1)
+      version_gem (~> 1.1)
     sshkit (1.21.2)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
     systemu (2.6.5)
     temple (0.8.2)
     tilt (2.0.10)
-    timeout (0.3.1)
     trailblazer-option (0.1.2)
     typhoeus (1.4.0)
       ethon (>= 0.9.0)
@@ -381,7 +362,7 @@ GEM
     uber (0.1.0)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.8.2)
+    unf_ext (0.0.8)
     unicorn (5.8.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
@@ -390,7 +371,7 @@ GEM
       unicorn (>= 4, < 7)
     uuid (2.3.9)
       macaddr (~> 1.0)
-    version_gem (1.1.1)
+    version_gem (1.1.0)
 
 PLATFORMS
   ruby
