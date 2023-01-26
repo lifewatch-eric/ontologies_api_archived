@@ -1,17 +1,57 @@
 require 'json'
 require 'logger'
+require 'jwt'
 
 class UsersController < ApplicationController
   namespace "/users" do
     post "/authenticate" do
-      # LOGGER.debug("Prova LOGGER /authenticate")
-      user_id       = params["user"]
-      user_password = params["password"]
       # Modify params to show all user attributes
       params["display"] = User.attributes.join(",")
-      user = User.find(user_id).include(User.goo_attrs_to_load(includes_param) + [:passwordHash]).first
-      authenticated = user.authenticate(user_password) unless user.nil?
-      error 401, "Username/password combination invalid" unless authenticated
+
+      # LOGGER.debug("Prova LOGGER /authenticate")
+      if $SSO_ENABLED
+        bearer_token = params["token"]
+        error 401, "No bearer token provided" unless bearer_token
+
+        begin
+          decoded_token = LinkedData::Security::Authorization.decodeJWT(bearer_token)
+        rescue JWT::DecodeError => e
+          LOGGER.debug(e)
+          error 401, "Failed to decode JWT token: " + e.message
+        end
+        token_payload = decoded_token[0]
+
+        user_id = token_payload[LinkedData.settings.oauth2_username_claim]
+        given_name = token_payload[LinkedData.settings.oauth2_given_name_claim]
+        family_name = token_payload[LinkedData.settings.oauth2_family_name_claim]
+        email = token_payload[LinkedData.settings.oauth2_email_claim]
+
+        user = User.find(user_id).include(User.goo_attrs_to_load(includes_param)).first
+
+        if user.nil? # first-time access, register new user
+          user_creation_params = {
+            username: user_id,
+            firstName: given_name,
+            lastName: family_name,
+            email: email,
+            password: SecureRandom.hex(16)
+          }
+
+          user = instance_from_params(User, user_creation_params)
+          if user.valid?
+            user.save
+          else
+            error 422, user.errors
+          end
+        end # otherwise nothing to do since we have already validated the access token for that user
+      else
+        user_id       = params["user"]
+        user_password = params["password"]
+        user = User.find(user_id).include(User.goo_attrs_to_load(includes_param) + [:passwordHash]).first
+        authenticated = user.authenticate(user_password) unless user.nil?
+        error 401, "Username/password combination invalid" unless authenticated
+      end
+
       user.show_apikey = true
       reply user
     end
@@ -75,7 +115,6 @@ class UsersController < ApplicationController
       # LOGGER.debug("user_controller.rb -> get #{params[:username]} : #{user.to_json}") #Ecoportal
       check_last_modified(user)
       user.bring(*User.goo_attrs_to_load(includes_param))
-      user.show_apikey = true if @params["show_apikey"] == "true" && Thread.current[:remote_user]&.username == params['username']
       reply user
     end
 
